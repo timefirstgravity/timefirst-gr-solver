@@ -1,0 +1,22 @@
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "timefirst-gr"
+version = "0.1.0"
+description = "Spherical 1+1D GR solver in a lapse-first gauge with benchmarking vs standard elliptic approach."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "Time-First Project"}]
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "matplotlib>=3.7",
+]
+
+[project.scripts]
+gr-bench = "timefirst_gr.benchmarks.bench_runtime:main"
+gr-example = "timefirst_gr.examples.compare_time:main"
