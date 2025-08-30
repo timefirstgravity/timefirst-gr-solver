@@ -61,7 +61,10 @@ class TimeFirstGRSolver:
     # ---- Initialization --------------------------------------------------
     def set_static_schwarzschild(self, M):
         self.M0 = M
-        A = 1.0 - 2.0 * self.G * M / (self.c**2 * self.r)
+        # Avoid division by zero at r=0 
+        A = np.ones_like(self.r)
+        mask = self.r > 0.0
+        A[mask] = 1.0 - 2.0 * self.G * M / (self.c**2 * self.r[mask])
         A = np.clip(A, 1e-12, None)  # avoid horizon blow-ups
         self.Phi = 0.5 * np.log(A)
 
@@ -82,27 +85,8 @@ class TimeFirstGRSolver:
             # For dΦ/dr = 0: Φ[0] = Φ[1] (reflection symmetry)
             self.Phi[0] = self.Phi[1]
             
-            # Outer BC: Asymptotic flatness - more gradual approach
-            # Instead of hard Φ=0, use exponential decay to asymptotic value
-            r_outer = self.r[-10:]  # Last 10 points
-            Phi_outer = self.Phi[-10:]
-            # Fit exponential decay: Φ ~ A exp(-r/L) 
-            try:
-                # Simple linear fit in log space for last few points
-                mask = Phi_outer > 1e-8
-                if np.sum(mask) >= 3:
-                    r_fit = r_outer[mask]
-                    log_Phi_fit = np.log(np.abs(Phi_outer[mask]))
-                    # Linear regression: log|Φ| = log|A| - r/L
-                    coeffs = np.polyfit(r_fit, log_Phi_fit, 1)
-                    decay_rate = -coeffs[0]
-                    # Extrapolate to boundary
-                    self.Phi[-1] = np.exp(coeffs[1] - decay_rate * self.r[-1])
-                    if Phi_outer[-1] < 0:
-                        self.Phi[-1] = -self.Phi[-1]
-            except:
-                # Fallback: simple exponential decay
-                self.Phi[-1] = self.Phi[-2] * 0.9
+            # Outer BC: Asymptotic flatness Φ(r_max) = 0 (robust Dirichlet condition)
+            self.Phi[-1] = 0.0
             
         self.t += dt
         return dPhi_dt

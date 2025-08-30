@@ -113,7 +113,7 @@ class VaidyaLikeNull(UnifiedMatter):
         """
         self.L_func = luminosity_func
         self.r_min = r_min
-        self.sign = -1.0 if direction == "ingoing" else +1.0
+        self.sign = +1.0 if direction == "ingoing" else -1.0
         
         # For null dust: T_tt = T_rr = 0, only T_tr ≠ 0
         def rho_func(t, r):
@@ -134,7 +134,12 @@ class VaidyaLikeNull(UnifiedMatter):
         return np.zeros_like(r)
         
     def T_tr(self, t, r, c=1.0):
-        """Pure flux: T_tr = ± L(t)/(4π r² c²)"""
+        """
+        Pure flux: T_tr = ± L(t)/(4π r² c²)
+        
+        For ingoing EF null dust: T_vv > 0, and T_tr = T_vv/A > 0 in diagonal gauge.
+        For outgoing: T_vv < 0, T_tr < 0.
+        """
         val = np.zeros_like(r)
         mask = r >= self.r_min
         val[mask] = self.sign * self.L_func(t) / (4.0 * np.pi * r[mask]**2 * c**2)

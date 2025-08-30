@@ -69,6 +69,22 @@ python test_fair_comparison.py
 python test_unified_comparison.py
 ```
 
+**Rigorous Validation Suite:**
+
+**Run All Tests (Recommended):**
+```bash
+python -m pytest tests/ -v    # Complete test suite (24 tests)
+```
+
+**Individual Test Modules:**
+```bash
+python tests/test_flux_units_and_sign.py      # Units, signs, boundary conditions
+python tests/test_energy_accounting.py        # Energy conservation
+python tests/test_manufactured_solution.py    # Convergence verification
+python tests/test_vaidya_cross_gauge.py       # Cross-gauge validation
+python tests/test_shared_evolution.py         # Fair comparison guarantee
+```
+
 The physics examples show proper-time per unit coordinate time at two radii, redshift factors, 
 and radial light-travel times. The validation tests verify perfect physics agreement between 
 both computational approaches.
@@ -77,6 +93,8 @@ both computational approaches.
 
 Both solvers evolve the same Einstein equation:
 \[ \partial_t \Phi = -4\pi G\, r\, T_{tr} / c^4 \]
+
+**Mathematical Guarantee:** Both solvers call the **same** function to compute ∂_t Φ from T_tr. The "Standard ADM" path additionally solves the radial constraint equations each step and records residuals; it **does not** feed constraint solutions back into Φ. Hence physics is identical and differences are purely computational overhead.
 
 **Key Difference:**
 - **Lapse-first**: Direct explicit evolution (efficient)

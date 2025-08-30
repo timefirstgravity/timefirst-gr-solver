@@ -93,21 +93,8 @@ class StandardADMSolver:
         # For dΦ/dr = 0: Φ[0] = Φ[1] (reflection symmetry)
         Phi[0] = Phi[1]
         
-        # Outer BC: Asymptotic flatness - more gradual approach
-        r_outer = self.r[-10:]  # Last 10 points
-        Phi_outer = Phi[-10:]
-        try:
-            mask = Phi_outer > 1e-8
-            if np.sum(mask) >= 3:
-                r_fit = r_outer[mask]
-                log_Phi_fit = np.log(np.abs(Phi_outer[mask]))
-                coeffs = np.polyfit(r_fit, log_Phi_fit, 1)
-                decay_rate = -coeffs[0]
-                Phi[-1] = np.exp(coeffs[1] - decay_rate * self.r[-1])
-                if Phi_outer[-1] < 0:
-                    Phi[-1] = -Phi[-1]
-        except:
-            Phi[-1] = Phi[-2] * 0.9
+        # Outer BC: Asymptotic flatness Φ(r_max) = 0 (robust Dirichlet condition)
+        Phi[-1] = 0.0
         
     def _simulate_constraint_work(self, Phi):
         """

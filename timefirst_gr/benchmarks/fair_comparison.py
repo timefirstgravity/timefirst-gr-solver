@@ -31,6 +31,12 @@ def fair_benchmark_case(nr=1000, t_end=1.0, dt=0.01, matter_scale=0.01,
     Key difference:
     - Lapse-first: ∂_t Φ = -4π G r T_tr / c^4 (direct evolution)
     - Standard ADM: Same evolution + constraint enforcement each step
+    
+    MATHEMATICAL GUARANTEE: Both solvers call the same function to compute
+    ∂_t Φ from T_tr. The Standard ADM path additionally solves constraint
+    equations and records residuals, but does NOT feed constraint solutions
+    back into Φ. Hence physics is identical and differences are purely
+    computational overhead.
     """
     
     # Create unified matter model

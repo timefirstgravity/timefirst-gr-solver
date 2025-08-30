@@ -21,13 +21,14 @@ class StandardEllipticSolver:
     with Newton + tridiagonal linear solves. This is intentionally heavier per step
     to illustrate the computational benefit of the lapse-first explicit update.
     """
-    def __init__(self, r_min=2.2, r_max=80.0, nr=1000, G=1.0, c=1.0):
+    def __init__(self, r_min=2.2, r_max=80.0, nr=1000, G=1.0, c=1.0, enforce_boundaries=True):
         self.G, self.c = G, c
         self.r = np.linspace(r_min, r_max, nr)
         self.dr = self.r[1] - self.r[0]
         self.nr = nr
         self.t = 0.0
         self.Phi = np.zeros_like(self.r)
+        self.enforce_boundaries = enforce_boundaries
         self.set_static_schwarzschild(M=1.0)
         self.T_tt = lambda t, r: np.zeros_like(r)
 
@@ -69,9 +70,15 @@ class StandardEllipticSolver:
             b[i] = dG_dPhi_i
             c[i] = dG_d_dPhi * (+1.0/(2.0*dr))
 
-        # Outer BC: Dirichlet Φ(Rmax)=0
-        F[-1] = Phi[-1] - 0.0
-        b[-1] = 1.0
+        # Outer BC: depends on enforce_boundaries setting
+        if self.enforce_boundaries:
+            # Dirichlet Φ(r_max) = 0
+            F[-1] = Phi[-1] - 0.0
+            b[-1] = 1.0
+        else:
+            # Neumann dΦ/dr = 0 at outer boundary
+            F[-1] = (Phi[-1] - Phi[-2]) / dr
+            a[-1] = -1.0/dr; b[-1] = 1.0/dr
 
         return F, a, b, c
 
