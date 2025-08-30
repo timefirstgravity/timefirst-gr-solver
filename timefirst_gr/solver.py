@@ -79,8 +79,8 @@ class TimeFirstGRSolver:
         # Enforce boundary conditions if requested (matching standard solver)
         if self.enforce_boundaries:
             # Inner BC: Neumann dΦ/dr = 0 (regularity at center)
-            # Use extrapolation from interior points to maintain smoothness
-            self.Phi[0] = self.Phi[1] - (self.Phi[2] - self.Phi[1])
+            # For dΦ/dr = 0: Φ[0] = Φ[1] (reflection symmetry)
+            self.Phi[0] = self.Phi[1]
             
             # Outer BC: Asymptotic flatness - more gradual approach
             # Instead of hard Φ=0, use exponential decay to asymptotic value

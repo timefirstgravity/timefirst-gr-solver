@@ -90,8 +90,8 @@ class StandardADMSolver:
         """Apply same boundary conditions as lapse-first solver for exact comparison."""
         # This should match the TimeFirstGRSolver boundary enforcement
         # Inner BC: Neumann dΦ/dr = 0 (regularity at center)
-        # Use extrapolation from interior points to maintain smoothness
-        Phi[0] = Phi[1] - (Phi[2] - Phi[1])
+        # For dΦ/dr = 0: Φ[0] = Φ[1] (reflection symmetry)
+        Phi[0] = Phi[1]
         
         # Outer BC: Asymptotic flatness - more gradual approach
         r_outer = self.r[-10:]  # Last 10 points

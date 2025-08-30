@@ -31,14 +31,12 @@ class UnifiedMatter:
     def T_tt(self, t, r, c=1.0):
         """
         T_tt component: energy density in coordinate time.
-        This is what the standard elliptic solver uses.
+        For perfect fluid (dust): T_tt = ρ γ² c²
         """
         rho = self.rho(t, r)
         v_r = self.v_r(t, r)
-        # T_tt = ρ γ² (c² + v_r²) where γ = 1/sqrt(1 - v_r²/c²)
-        # For non-relativistic motion, γ ≈ 1 and T_tt ≈ ρ c²
         gamma_sq = 1.0 / (1.0 - (v_r/c)**2)
-        return rho * gamma_sq * (c**2 + v_r**2)
+        return rho * gamma_sq * c**2
     
     def T_rr(self, t, r, c=1.0):
         """
@@ -52,13 +50,12 @@ class UnifiedMatter:
     def T_tr(self, t, r, c=1.0):
         """
         T_tr component: energy flux in radial direction.
-        This is what the lapse-first solver uses for evolution.
+        For perfect fluid (dust): T_tr = ρ γ² c v_r
         """
         rho = self.rho(t, r)
         v_r = self.v_r(t, r)
-        # T_tr = -ρ γ² (c² + v_r²) v_r / c
         gamma_sq = 1.0 / (1.0 - (v_r/c)**2)
-        return -rho * gamma_sq * (c**2 + v_r**2) * v_r / c
+        return rho * gamma_sq * c * v_r
 
 class GaussianPulse(UnifiedMatter):
     """
