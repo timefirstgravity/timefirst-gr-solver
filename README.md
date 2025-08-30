@@ -7,7 +7,7 @@ A minimal, fast **1+1D spherical GR solver** in a **lapse-first** gauge designed
 the computational advantages of time-first formulations. It includes:
 
 - `TimeFirstGRSolver` — explicit O(N) update of the lapse potential Φ via the flux law  
-  \( \partial_t \Phi = -4\pi G\, r \, T_{tr} / c^4 \).
+  ∂<sub>t</sub>Φ = -4πGr T<sub>tr</sub>/c<sup>4</sup>
 - `StandardADMSolver` — solves the same evolution equations but with expensive traditional ADM constraint operations.
 - A **fair apples-to-apples benchmark** comparing computational efficiency for identical physics problems.
 - Examples: proper-time comparison, redshift drift, and light-travel (Shapiro-style) delay.
@@ -94,7 +94,8 @@ both computational approaches.
 ## Computational Approach
 
 Both solvers evolve the same Einstein equation:
-\[ \partial_t \Phi = -4\pi G\, r\, T_{tr} / c^4 \]
+
+$$\partial_t \Phi = -4\pi G r T_{tr} / c^4$$
 
 **Mathematical Guarantee:** Both solvers call the **same** function to compute ∂_t Φ from T_tr. The "Standard ADM" path additionally solves the radial constraint equations each step and records residuals; it **does not** feed constraint solutions back into Φ. Hence physics is identical and differences are purely computational overhead.
 
@@ -116,16 +117,18 @@ The benchmarks demonstrate:
 ## Model
 
 Metric (lapse-first gauge):
-\[ ds^2 = -e^{2\Phi(t,r)} dt^2 + e^{-2\Phi(t,r)} dr^2 + r^2 d\Omega^2. \]
+
+$$ds^2 = -e^{2\Phi(t,r)} dt^2 + e^{-2\Phi(t,r)} dr^2 + r^2 d\Omega^2$$
 
 Evolution equation:
-\[ \partial_t \Phi = -4\pi G\, r\, T_{tr} / c^4. \]
+
+$$\partial_t \Phi = -4\pi G r T_{tr} / c^4$$
 
 Constraint diagnostics:
-\[
-G_{rr} = \frac{2\,\partial_r\Phi}{r} + \frac{1}{r^2} - \frac{1}{A r^2},\qquad
-G_{tt} = \frac{A}{r^2}\Big(-2 r A \partial_r \Phi - A + 1\Big),\quad A=e^{2\Phi}.
-\]
+
+$$G_{rr} = \frac{2\partial_r\Phi}{r} + \frac{1}{r^2} - \frac{1}{A r^2}$$
+
+$$G_{tt} = \frac{A}{r^2}\left(-2 r A \partial_r \Phi - A + 1\right), \quad A=e^{2\Phi}$$
 
 ## Related Work
 
