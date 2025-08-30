@@ -127,5 +127,10 @@ G_{rr} = \frac{2\,\partial_r\Phi}{r} + \frac{1}{r^2} - \frac{1}{A r^2},\qquad
 G_{tt} = \frac{A}{r^2}\Big(-2 r A \partial_r \Phi - A + 1\Big),\quad A=e^{2\Phi}.
 \]
 
+## Related Work
+
+This implementation demonstrates the computational advantages of lapse-first variables in general relativity:
+**[Gravity as Temporal Geometry](https://doi.org/10.5281/zenodo.16878018)**
+
 ## License
 MIT
