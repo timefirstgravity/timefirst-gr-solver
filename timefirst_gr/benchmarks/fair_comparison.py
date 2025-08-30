@@ -61,7 +61,8 @@ def fair_benchmark_case(nr=1000, t_end=1.0, dt=0.01, matter_scale=0.01,
     lapse_time = time.perf_counter() - t0_lapse
 
     # Standard ADM solver: Same evolution + constraint enforcement (expensive)
-    S_adm = StandardADMSolver(r_min=2.2, r_max=80.0, nr=nr, G=1.0, c=1.0)
+    S_adm = StandardADMSolver(r_min=2.2, r_max=80.0, nr=nr, G=1.0, c=1.0, 
+                             enforce_boundaries=False)  # Match lapse-first
     S_adm.set_static_schwarzschild(M=1.0)
     S_adm.set_matter_model(matter)
 
