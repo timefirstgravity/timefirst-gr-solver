@@ -1,6 +1,8 @@
 
 # timefirst-gr
 
+[![DOI](https://zenodo.org/badge/1046443527.svg)](https://doi.org/10.5281/zenodo.17009363)
+
 A minimal, fast **1+1D spherical GR solver** in a **lapse-first** gauge designed to demonstrate
 the computational advantages of time-first formulations. It includes:
 
