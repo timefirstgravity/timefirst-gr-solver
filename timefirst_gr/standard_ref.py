@@ -99,3 +99,25 @@ class StandardEllipticSolver:
         for _ in range(steps):
             self.solve_step(self.t, T_tt)
             self.t += dt
+    
+    def mass_function(self):
+        A = self.A()
+        return (self.c**2 * self.r / (2.0 * self.G)) * (1.0 - A)
+    
+    def constraints_residuals(self):
+        """Add constraint residuals for compatibility with validation."""
+        r = self.r
+        A = self.A()
+        Phi = self.Phi
+        dr = self.dr
+        dPhi_dr = np.gradient(Phi, r, edge_order=2)
+        G_rr = 2.0 * dPhi_dr / r + 1.0 / (r**2) - 1.0 / (A * r**2)
+        G_tt = (A / r**2) * (-2.0 * r * A * dPhi_dr - A + 1.0)
+        
+        # For standard solver, we don't store matter functions, so return diagnostic values
+        # This is mainly used for validation comparisons
+        T_tt_current = self.T_tt(self.t, r) if hasattr(self, 'T_tt') else np.zeros_like(r)
+        src_rr = np.zeros_like(r)  # Standard solver doesn't use T_rr
+        src_tt = 8.0 * np.pi * self.G * T_tt_current / (self.c**4)
+        
+        return (G_rr - src_rr, G_tt - src_tt)

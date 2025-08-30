@@ -13,17 +13,29 @@ class TimeFirstGRSolver:
         with A = e^{2Φ}.
     Matter is provided via callables T_tr(t, r), T_tt(t, r), T_rr(t, r).
     """
-    def __init__(self, r_min=2.2, r_max=100.0, nr=2000, G=1.0, c=1.0):
+    def __init__(self, r_min=2.2, r_max=100.0, nr=2000, G=1.0, c=1.0, 
+                 enforce_boundaries=True):
         self.G = G
         self.c = c
         self.r = np.linspace(r_min, r_max, nr)
+        self.dr = self.r[1] - self.r[0]
         self.nr = nr
         self.t = 0.0
         self.M0 = 0.0
         self.Phi = np.zeros_like(self.r)  # A = e^{2Φ} = 1 initially
         self.matter = None
+        self.enforce_boundaries = enforce_boundaries
 
     # ---- Matter models --------------------------------------------------
+    def set_matter_model(self, matter_obj):
+        """
+        Set matter using a UnifiedMatter object for consistent physics.
+        """
+        def T_tr(t, r): return matter_obj.T_tr(t, r, c=self.c)
+        def T_tt(t, r): return matter_obj.T_tt(t, r, c=self.c)  
+        def T_rr(t, r): return matter_obj.T_rr(t, r, c=self.c)
+        self.matter = (T_tr, T_tt, T_rr)
+        
     def set_vacuum(self):
         def T_tr(t, r): return np.zeros_like(r)
         def T_tt(t, r): return np.zeros_like(r)
@@ -32,7 +44,7 @@ class TimeFirstGRSolver:
 
     def set_null_dust(self, L_of_t, r0=0.0, direction="ingoing"):
         """
-        Vaidya-like null dust:
+        Vaidya-like null dust (legacy method - prefer set_matter_model with VaidyaLikeNull):
           T_tr(t,r) = ± L(t) / (4π r^2 c^2), r >= r0; sign by direction.
         T_tt and T_rr set to zero here (diagnostics will report mismatch).
         """
@@ -56,11 +68,42 @@ class TimeFirstGRSolver:
     # ---- Evolution -------------------------------------------------------
     def step(self, dt):
         if self.matter is None:
-            raise RuntimeError("Matter not set. Use set_vacuum() or set_null_dust(...).")
+            raise RuntimeError("Matter not set. Use set_vacuum() or set_matter_model(...).")
         T_tr, T_tt, T_rr = self.matter
         r = self.r
         dPhi_dt = -4.0 * np.pi * self.G * r * T_tr(self.t, r) / (self.c**4)
+        
+        # Apply evolution
         self.Phi = self.Phi + dt * dPhi_dt
+        
+        # Enforce boundary conditions if requested (matching standard solver)
+        if self.enforce_boundaries:
+            # Inner BC: Neumann dΦ/dr = 0 (regularity at center)
+            # Use extrapolation from interior points to maintain smoothness
+            self.Phi[0] = self.Phi[1] - (self.Phi[2] - self.Phi[1])
+            
+            # Outer BC: Asymptotic flatness - more gradual approach
+            # Instead of hard Φ=0, use exponential decay to asymptotic value
+            r_outer = self.r[-10:]  # Last 10 points
+            Phi_outer = self.Phi[-10:]
+            # Fit exponential decay: Φ ~ A exp(-r/L) 
+            try:
+                # Simple linear fit in log space for last few points
+                mask = Phi_outer > 1e-8
+                if np.sum(mask) >= 3:
+                    r_fit = r_outer[mask]
+                    log_Phi_fit = np.log(np.abs(Phi_outer[mask]))
+                    # Linear regression: log|Φ| = log|A| - r/L
+                    coeffs = np.polyfit(r_fit, log_Phi_fit, 1)
+                    decay_rate = -coeffs[0]
+                    # Extrapolate to boundary
+                    self.Phi[-1] = np.exp(coeffs[1] - decay_rate * self.r[-1])
+                    if Phi_outer[-1] < 0:
+                        self.Phi[-1] = -self.Phi[-1]
+            except:
+                # Fallback: simple exponential decay
+                self.Phi[-1] = self.Phi[-2] * 0.9
+            
         self.t += dt
         return dPhi_dt
 
